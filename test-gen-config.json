@@ -1,0 +1,26 @@
+{
+    "enabled": "true",
+    "increase-coverage": {
+      "project-name": "eval-json-simple",
+      "target-branches": [
+        "master"
+      ],
+      "test-env-docker-stage": "build",
+      "build-test-env-docker-stage-script-path": "tool/build-test-env-docker-stage.sh",
+      "test-files-folders": [
+        "src"
+      ],
+      "source-test-file-paths": [
+        {
+          "source-file-path": "src/main/java/org/json/simple/JSONArray.java",
+          "test-file-path": "src/test/java/org/json/simple/JSONArrayTest.java"
+        }
+      ],
+      "test-command": "mvn clean test verify -Dmaven.test.failure.ignore=true",
+      "coverage-type": "jacoco",
+      "code-coverage-report-path": "target/site/jacoco/jacoco.csv",
+      "desired-coverage": 90,
+      "max-iterations": 1,
+      "max-number-of-test-cases": 6
+    }
+  }
