@@ -285,4 +285,143 @@ public class JSONArrayTest extends TestCase {
 		JSONArray.writeJSONString(new Object[] { "Hello", new Integer(12), new int[] { 1, 2, 3} }, writer);
 		assertEquals("[\"Hello\",12,[1,2,3]]", writer.toString());
 	}
+
+ public void test_json_array_arraylist_inheritance() {
+     // Create a JSONArray and use ArrayList methods
+     JSONArray jsonArray = new JSONArray();
+     
+     // Test add, size, get
+     jsonArray.add("element1");
+     jsonArray.add(42);
+     assertEquals(2, jsonArray.size());
+     assertEquals("element1", jsonArray.get(0));
+     assertEquals(42, jsonArray.get(1));
+     
+     // Test remove
+     jsonArray.remove(0);
+     assertEquals(1, jsonArray.size());
+     assertEquals(42, jsonArray.get(0));
+     
+     // Test contains
+     jsonArray.add("test");
+     assertTrue(jsonArray.contains("test"));
+     assertFalse(jsonArray.contains("nonexistent"));
+     
+     // Test clear
+     jsonArray.clear();
+     assertEquals(0, jsonArray.size());
+     
+     // Test addAll
+     ArrayList<String> list = new ArrayList<String>();
+     list.add("item1");
+     list.add("item2");
+     jsonArray.addAll(list);
+     assertEquals(2, jsonArray.size());
+     assertEquals("item1", jsonArray.get(0));
+     
+     // Ensure it still works as a JSONArray after ArrayList operations
+     assertEquals("[\"item1\",\"item2\"]", jsonArray.toJSONString());
+ }
+
+
+ public void test_nested_json_structures() throws IOException {
+     // Create a complex nested structure
+     JSONObject innerObject = new JSONObject();
+     innerObject.put("key1", "value1");
+     innerObject.put("key2", 42);
+     
+     JSONArray innerArray = new JSONArray();
+     innerArray.add(true);
+     innerArray.add(false);
+     
+     JSONArray outerArray = new JSONArray();
+     outerArray.add("string");
+     outerArray.add(123);
+     outerArray.add(innerObject);
+     outerArray.add(innerArray);
+     
+     // Test toJSONString
+     String result = outerArray.toJSONString();
+     assertEquals("[\"string\",123,{\"key1\":\"value1\",\"key2\":42},[true,false]]", result);
+     
+     // Test writeJSONString with Object array
+     Object[] complexArray = new Object[]{"string", 123, innerObject, innerArray};
+     StringWriter writer = new StringWriter();
+     JSONArray.writeJSONString(complexArray, writer);
+     assertEquals("[\"string\",123,{\"key1\":\"value1\",\"key2\":42},[true,false]]", writer.toString());
+ }
+
+
+ public void test_null_elements_in_collections() throws IOException {
+     // Test collection with null elements
+     ArrayList<Object> listWithNulls = new ArrayList<Object>();
+     listWithNulls.add("First");
+     listWithNulls.add(null);
+     listWithNulls.add("Last");
+     
+     // Test toJSONString
+     String result = JSONArray.toJSONString(listWithNulls);
+     assertEquals("[\"First\",null,\"Last\"]", result);
+     
+     // Test writeJSONString
+     StringWriter writer = new StringWriter();
+     JSONArray.writeJSONString(listWithNulls, writer);
+     assertEquals("[\"First\",null,\"Last\"]", writer.toString());
+     
+     // Test with JSONArray containing nulls
+     JSONArray jsonArray = new JSONArray();
+     jsonArray.add("First");
+     jsonArray.add(null);
+     jsonArray.add("Last");
+     
+     assertEquals("[\"First\",null,\"Last\"]", jsonArray.toJSONString());
+ }
+
+
+ public void test_float_and_double_arrays_with_special_values() throws IOException {
+     // Test float array with special values
+     float[] specialFloats = {Float.NaN, Float.POSITIVE_INFINITY, Float.NEGATIVE_INFINITY, 1.0f};
+     String floatResult = JSONArray.toJSONString(specialFloats);
+     assertEquals("[NaN,Infinity,-Infinity,1.0]", floatResult);
+     
+     // Test double array with special values
+     double[] specialDoubles = {Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY, 1.0};
+     String doubleResult = JSONArray.toJSONString(specialDoubles);
+     assertEquals("[NaN,Infinity,-Infinity,1.0]", doubleResult);
+     
+     // Test writeJSONString for float array
+     StringWriter floatWriter = new StringWriter();
+     JSONArray.writeJSONString(specialFloats, floatWriter);
+     assertEquals("[NaN,Infinity,-Infinity,1.0]", floatWriter.toString());
+     
+     // Test writeJSONString for double array
+     StringWriter doubleWriter = new StringWriter();
+     JSONArray.writeJSONString(specialDoubles, doubleWriter);
+     assertEquals("[NaN,Infinity,-Infinity,1.0]", doubleWriter.toString());
+ }
+
+
+ public void test_extremely_large_collection() throws IOException {
+     // Create a large collection with a reasonable size for unit testing
+     // (Using 100,000 instead of millions to keep test execution time reasonable)
+     final ArrayList<Integer> largeList = new ArrayList<Integer>();
+     final int size = 100000;
+     for (int i = 0; i < size; i++) {
+         largeList.add(i);
+     }
+     
+     // Test that we can write this to a StringWriter without issues
+     final StringWriter writer = new StringWriter();
+     JSONArray.writeJSONString(largeList, writer);
+     
+     // Verify the output starts and ends correctly
+     String result = writer.toString();
+     assertTrue(result.startsWith("[0,1,2,"));
+     assertTrue(result.endsWith("]"));
+     
+     // Verify the length is as expected (each number plus comma)
+     // The last element doesn't have a comma, so we subtract 1
+     assertEquals(size * 2 - 1 + 2, result.length()); // numbers + commas + [ and ]
+ }
+
 }
